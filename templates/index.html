@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Huawei Cloud Server Manager</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background: #f5f5f5; }
+        table { width: 100%; background: white; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; }
+        button { padding: 6px 10px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>Huawei Cloud Server Manager</h2>
+
+<button onclick="loadServers()">Refresh</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="serverTable"></tbody>
+</table>
+
+<script>
+async function loadServers() {
+    const response = await fetch('/api/servers');
+    const servers = await response.json();
+
+    const table = document.getElementById('serverTable');
+    table.innerHTML = '';
+
+    servers.forEach(server => {
+        table.innerHTML += `
+            <tr>
+                <td>${server.name}</td>
+                <td>${server.status}</td>
+                <td>
+                    <button onclick="startServer('${server.id}')">Start</button>
+                    <button onclick="stopServer('${server.id}')">Stop</button>
+                    <button onclick="rebootServer('${server.id}')">Reboot</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function startServer(id) {
+    await fetch('/api/start/' + id, { method: 'POST' });
+    loadServers();
+}
+
+async function stopServer(id) {
+    await fetch('/api/stop/' + id, { method: 'POST' });
+    loadServers();
+}
+
+async function rebootServer(id) {
+    await fetch('/api/reboot/' + id, { method: 'POST' });
+    loadServers();
+}
+
+loadServers();
+</script>
+
+</body>
+</html>
